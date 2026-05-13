@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx expo *)",
+      "Bash(npm install *)",
+      "Bash(rm -f components/external-link.tsx components/haptic-tab.tsx components/hello-wave.tsx components/parallax-scroll-view.tsx components/themed-text.tsx components/themed-view.tsx components/ui/collapsible.tsx components/ui/icon-symbol.tsx components/ui/icon-symbol.ios.tsx hooks/use-color-scheme.ts hooks/use-color-scheme.web.ts hooks/use-theme-color.ts constants/theme.ts app/modal.tsx \"app/\\(tabs\\)/explore.tsx\" \"app/\\(tabs\\)/index.tsx\" \"app/\\(tabs\\)/_layout.tsx\" app/_layout.tsx scripts/reset-project.js)",
+      "Bash(rmdir scripts *)",
+      "Bash(npx tsc *)",
+      "Bash(ls \"c:/Users/Thiago Akira/.claude/projects/c--Users-Thiago-Akira-Documents-Programas-akaito/memory/\" 2>&1)",
+      "Read(//c/Users/Thiago Akira/.claude/projects/c--Users-Thiago-Akira-Documents-Programas-akaito/**)"
+    ]
+  }
+}
