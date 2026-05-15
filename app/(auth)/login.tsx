@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
-  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -49,6 +50,7 @@ export default function Login() {
       setError(error.message);
       return;
     }
+    Alert.alert('Bem-vindo! 💖', 'Login feito com sucesso.');
   }
 
   return (
@@ -56,12 +58,15 @@ export default function Login() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1">
-        <View className="flex-1 justify-center px-8">
+        <ScrollView
+          contentContainerClassName="grow justify-center px-8 py-12"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
           <Text className="text-love-700 mb-2 text-4xl font-bold">akaito 💖</Text>
           <Text className="mb-10 text-base text-gray-600">
             {step === 'email'
-              ? 'entre com seu e-mail pra receber um código'
-              : `enviamos um código pra ${email}`}
+              ? 'Entre com seu e-mail pra receber um código'
+              : `Enviamos um código pra ${email}`}
           </Text>
 
           {step === 'email' ? (
@@ -84,7 +89,7 @@ export default function Login() {
                   <ActivityIndicator color="white" />
                 ) : (
                   <Text className="text-center text-base font-semibold text-white">
-                    enviar código
+                    Enviar código
                   </Text>
                 )}
               </Pressable>
@@ -93,21 +98,21 @@ export default function Login() {
             <>
               <TextInput
                 value={code}
-                onChangeText={setCode}
-                placeholder="000000"
+                onChangeText={(v) => setCode(v.replace(/\D/g, ''))}
+                placeholder="00000000"
                 keyboardType="number-pad"
-                maxLength={6}
+                maxLength={10}
                 editable={!loading}
                 className="mb-4 rounded-2xl border border-love-200 bg-white px-5 py-4 text-center text-2xl tracking-widest"
               />
               <Pressable
                 onPress={verifyCode}
-                disabled={loading || code.length !== 6}
+                disabled={loading || code.length < 6}
                 className="mb-3 rounded-2xl bg-love-600 py-4 active:bg-love-700 disabled:opacity-50">
                 {loading ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text className="text-center text-base font-semibold text-white">entrar</Text>
+                  <Text className="text-center text-base font-semibold text-white">Entrar</Text>
                 )}
               </Pressable>
               <Pressable
@@ -117,7 +122,7 @@ export default function Login() {
                   setError(null);
                 }}
                 disabled={loading}>
-                <Text className="text-center text-sm text-gray-500">trocar e-mail</Text>
+                <Text className="text-center text-sm text-gray-500">Trocar e-mail</Text>
               </Pressable>
             </>
           )}
@@ -125,7 +130,7 @@ export default function Login() {
           {error && (
             <Text className="mt-4 text-center text-sm text-red-600">{error}</Text>
           )}
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
