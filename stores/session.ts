@@ -1,6 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { mmkvJsonStorage } from '@/lib/storage';
 
 type SessionState = {
   userId: string | null;
@@ -15,7 +15,7 @@ export const useSessionStore = create<SessionState>()(
     }),
     {
       name: 'akaito-session',
-      storage: createJSONStorage(() => mmkvJsonStorage),
+      storage: createJSONStorage(() => AsyncStorage),
     },
   ),
 );

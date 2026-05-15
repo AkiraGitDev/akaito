@@ -25,7 +25,7 @@ Implicações práticas dessa restrição:
 - **NativeWind** (Tailwind para RN) para estilos
 - **Zustand** para state global (UI state, sessão)
 - **TanStack Query** para cache e sincronização com backend
-- **react-native-mmkv** para storage local (rápido, síncrono)
+- **@react-native-async-storage/async-storage** para storage local (compatível com Expo Go e web — performance suficiente pro app)
 - **expo-notifications** para push
 - **expo-image-picker** + **expo-image** para fotos
 - **date-fns** para manipulação de datas (não usar moment)
