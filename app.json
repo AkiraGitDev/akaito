@@ -40,7 +40,13 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Akaito precisa acessar suas fotos pra você escolher seu avatar."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

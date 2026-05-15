@@ -1,6 +1,7 @@
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 
 import { useMyProfile, usePartnerProfile, type Profile } from '@/lib/queries/profiles';
 import { calculateAge, daysTogether, nextMilestone } from '@/lib/utils/dates';
@@ -27,10 +28,18 @@ function ProfileCard({ profile, placeholder, onPress }: CardProps) {
       onPress={onPress}
       disabled={!onPress}
       className="flex-1 items-center rounded-3xl bg-white p-5 active:bg-love-100">
-      <View className="mb-3 h-20 w-20 items-center justify-center rounded-full bg-love-200">
-        <Text className="text-love-700 text-2xl font-bold">
-          {profile ? initialsOf(name) : '💞'}
-        </Text>
+      <View className="mb-3 h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-love-200">
+        {profile?.avatar_url ? (
+          <Image
+            source={{ uri: profile.avatar_url }}
+            style={{ width: 80, height: 80 }}
+            contentFit="cover"
+          />
+        ) : (
+          <Text className="text-love-700 text-2xl font-bold">
+            {profile ? initialsOf(name) : '💞'}
+          </Text>
+        )}
       </View>
       <Text className="text-base font-semibold text-gray-800" numberOfLines={1}>
         {name}

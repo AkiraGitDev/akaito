@@ -12,17 +12,27 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/use-auth';
-import { useMyProfile, useUpdateProfile } from '@/lib/queries/profiles';
+import { useMyProfile, useUpdateProfile, useUploadAvatar } from '@/lib/queries/profiles';
 import { formatBRDate, maskBRDate, parseBRDate } from '@/lib/utils/dates';
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (!parts[0]) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0]! + parts[parts.length - 1]![0]!).toUpperCase();
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { session } = useAuth();
   const { data: profile, isLoading } = useMyProfile();
   const updateProfile = useUpdateProfile();
+  const uploadAvatar = useUploadAvatar();
 
   const [name, setName] = useState('');
   const [birthday, setBirthday] = useState('');
@@ -33,6 +43,28 @@ export default function ProfileScreen() {
       setBirthday(formatBRDate(profile.birthday));
     }
   }, [profile]);
+
+  async function handlePickAvatar() {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Sem permissão', 'Preciso de acesso às fotos pra você escolher um avatar.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    if (!asset) return;
+    try {
+      await uploadAvatar.mutateAsync(asset.uri);
+    } catch (e: any) {
+      Alert.alert('Erro ao enviar foto', e.message ?? 'Tenta de novo.');
+    }
+  }
 
   async function handleSave() {
     const trimmedName = name.trim();
@@ -70,6 +102,9 @@ export default function ProfileScreen() {
     ]);
   }
 
+  const avatarUrl = profile?.avatar_url ?? null;
+  const initials = initialsOf(name || profile?.name || '');
+
   return (
     <SafeAreaView className="flex-1 bg-love-50">
       <Stack.Screen
@@ -90,6 +125,28 @@ export default function ProfileScreen() {
             <ActivityIndicator color="#c40b43" />
           ) : (
             <>
+              <View className="mb-8 items-center">
+                <Pressable onPress={handlePickAvatar} disabled={uploadAvatar.isPending}>
+                  <View className="h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-love-300 bg-love-200">
+                    {avatarUrl ? (
+                      <Image
+                        source={{ uri: avatarUrl }}
+                        style={{ width: 128, height: 128 }}
+                        contentFit="cover"
+                      />
+                    ) : (
+                      <Text className="text-love-700 text-4xl font-bold">{initials}</Text>
+                    )}
+                    {uploadAvatar.isPending && (
+                      <View className="absolute inset-0 items-center justify-center bg-black/40">
+                        <ActivityIndicator color="white" />
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+                <Text className="text-love-600 mt-2 text-sm">Trocar foto</Text>
+              </View>
+
               <Text className="mb-1 text-sm text-gray-500">E-mail</Text>
               <Text className="mb-6 text-base text-gray-800">{session?.user.email}</Text>
 

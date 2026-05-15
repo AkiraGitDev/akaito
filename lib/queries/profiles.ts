@@ -71,3 +71,36 @@ export function useUpdateProfile() {
     },
   });
 }
+
+export function useUploadAvatar() {
+  const { session } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (localUri: string) => {
+      if (!session) throw new Error('Sem sessão.');
+      const userId = session.user.id;
+      const ext = (localUri.split('.').pop() ?? 'jpg').toLowerCase().split('?')[0] ?? 'jpg';
+      const path = `${userId}/${Date.now()}.${ext}`;
+      const response = await fetch(localUri);
+      const buffer = await response.arrayBuffer();
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, buffer, {
+          contentType: ext === 'png' ? 'image/png' : 'image/jpeg',
+          upsert: false,
+        });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+      const publicUrl = `${data.publicUrl}?t=${Date.now()}`;
+      const { error: updErr } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', userId);
+      if (updErr) throw updErr;
+      return publicUrl;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['profiles'] });
+    },
+  });
+}
