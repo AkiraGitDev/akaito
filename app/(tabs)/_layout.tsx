@@ -17,19 +17,17 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="chat"
-        options={{
-          title: 'Chat',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="memories"
         options={{
           title: 'Memórias',
           tabBarIcon: ({ color, size }) => <Ionicons name="images" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="media"
+        options={{
+          title: 'Pra ver',
+          tabBarIcon: ({ color, size }) => <Ionicons name="film" color={color} size={size} />,
         }}
       />
       <Tabs.Screen

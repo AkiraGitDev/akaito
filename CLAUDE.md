@@ -47,11 +47,12 @@ Implicações práticas dessa restrição:
 /app                  # Telas (Expo Router)
   /(tabs)
     index.tsx         # Home: contador, próximo countdown, pergunta do dia
-    chat.tsx
     memories.tsx
+    media.tsx         # filmes, séries, animes, podcasts...
     places.tsx
     stats.tsx
   /memory/[id].tsx
+  /media/[id].tsx
   /place/[id].tsx
 /components           # Componentes reutilizáveis
   /ui                 # Componentes base (Button, Card, Input...)
@@ -100,15 +101,6 @@ profiles (
   avatar_url text,
   birthday date,
   expo_push_token text,
-  created_at timestamptz default now()
-)
-
--- Chat
-messages (
-  id uuid primary key default gen_random_uuid(),
-  sender_id uuid references profiles(id) not null,
-  content text not null,
-  read_at timestamptz,
   created_at timestamptz default now()
 )
 
@@ -169,15 +161,16 @@ streak (
   last_complete_date date
 )
 
--- Lugares (restaurantes etc)
+-- Lugares (restaurantes, eventos, shows...)
 places (
   id uuid primary key default gen_random_uuid(),
   name text not null,
+  type text not null default 'restaurant',  -- 'restaurant', 'event', 'other'
+  category text,                            -- ex: 'italiana', 'show', 'cinema'
   address text,
   latitude numeric,
   longitude numeric,
   visited_at date,
-  cuisine text,
   created_by uuid references profiles(id),
   created_at timestamptz default now()
 )
@@ -186,13 +179,36 @@ place_reviews (
   id uuid primary key default gen_random_uuid(),
   place_id uuid references places(id) on delete cascade,
   user_id uuid references profiles(id),
-  rating_food int check (rating_food between 1 and 5),
-  rating_vibe int check (rating_vibe between 1 and 5),
-  rating_price int check (rating_price between 1 and 5),
-  notes text,
+  rating_quality int check (rating_quality between 0 and 5),    -- comida / qualidade do evento
+  rating_ambience int check (rating_ambience between 0 and 5),  -- ambiente
+  rating_value int check (rating_value between 0 and 5),        -- custo-benefício
+  comment text,
   would_return boolean,
   created_at timestamptz default now(),
   unique(place_id, user_id)
+)
+
+-- Mídia (filmes, séries, animes, podcasts, livros...)
+media (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  type text not null,                       -- 'movie', 'series', 'anime', 'podcast', 'book', 'other'
+  status text not null default 'want',      -- 'want', 'watching', 'done'
+  cover_url text,
+  external_id text,                         -- opcional: TMDB/IMDb/AniList id
+  added_by uuid references profiles(id),
+  created_at timestamptz default now()
+)
+
+media_reviews (
+  id uuid primary key default gen_random_uuid(),
+  media_id uuid references media(id) on delete cascade,
+  user_id uuid references profiles(id),
+  rating int check (rating between 0 and 5),
+  comment text,
+  finished_at date,
+  created_at timestamptz default now(),
+  unique(media_id, user_id)
 )
 ```
 
@@ -208,15 +224,7 @@ place_reviews (
 - Perfis dos dois lado a lado com foto, nome e idade calculada.
 - Editar perfil: nome, foto, aniversário.
 
-### 2. Chat realtime
-- Lista de mensagens com paginação (mais novas primeiro).
-- Subscription do Supabase Realtime no canal `messages`.
-- Indicador "lido" via `read_at` (atualiza quando o destinatário abre a tela).
-- Bubble do remetente à direita, do outro à esquerda.
-- Push notification quando recebe mensagem com app fechado.
-- **MVP só texto.** Imagens e áudio ficam pra V2.
-
-### 3. Galeria / Memórias
+### 2. Galeria / Memórias
 - Cada memória tem **data própria** (`memory_date`), permitindo registrar momentos antigos.
 - Uma memória pode ter múltiplas fotos (`memory_photos`).
 - Upload via `expo-image-picker` → Supabase Storage (bucket `memories`).
@@ -227,25 +235,25 @@ place_reviews (
   - **Mapa** (pins onde memórias têm coordenadas)
 - Cada memória tem: caption, local opcional, data, fotos.
 
-### 4. Push Notifications
+### 3. Push Notifications
 - Setup via `expo-notifications`. Salvar token em `profiles.expo_push_token`.
 - Eventos que disparam notificação **pro outro**:
-  - Nova mensagem no chat
   - Parceiro respondeu a pergunta do dia (sem revelar a resposta)
   - Nova memória adicionada
   - Novo lugar adicionado
+  - Nova mídia adicionada na lista "pra ver"
   - Countdown se aproximando (N dias antes, conforme `notify_days_before`)
 - Send via Edge Function chamando Expo Push API.
 - **Nunca** notificar a si mesmo.
 
-### 5. Countdowns
+### 4. Countdowns
 - Lista de eventos futuros ordenados pelo mais próximo.
 - Cada item mostra: emoji, título, dias restantes.
 - Tela inicial destaca o próximo.
 - Cron job (Edge Function agendada) roda diariamente e envia push pros dias configurados.
 - CRUD simples: criar, editar, deletar.
 
-### 6. Perguntas Diárias + Streak (foguinho 🔥)
+### 5. Perguntas Diárias + Streak (foguinho 🔥)
 - Pool de perguntas pré-cadastradas em `daily_questions` (seed inicial com ~200 perguntas).
 - A cada dia, uma pergunta é atribuída via `daily_assignments` (criada lazy quando alguém abre a tela).
 - Fluxo:
@@ -260,31 +268,44 @@ place_reviews (
 - Notificar o parceiro quando você responder ("seu amor respondeu a pergunta do dia 💌").
 - Permitir browse de perguntas/respostas passadas.
 
-### 7. Lugares onde comemos (reviews)
-- Adicionar lugar: nome, endereço (autocomplete via Places API opcional), data da visita, tipo de cozinha.
+### 6. Lugares (restaurantes, eventos, shows) + reviews
+- Adicionar lugar: nome, tipo (`restaurant` / `event` / `other`), categoria livre (ex: "italiana", "show"), endereço opcional (autocomplete via Places API opcional), data da visita.
 - Cada um faz seu review individualmente:
-  - Nota comida (1–5)
-  - Nota ambiente (1–5)
-  - Nota custo-benefício (1–5)
-  - Notas livres
+  - Nota qualidade (0–5) — comida no restaurante, qualidade do evento
+  - Nota ambiente (0–5)
+  - Nota custo-benefício (0–5)
+  - Comentário livre
   - "Voltaria?" (sim/não)
-- Visão do lugar mostra os **dois reviews lado a lado** + médias.
-- Listagem com filtros: melhores avaliados, mais recentes, "queremos voltar".
+- Visão do lugar mostra os **dois reviews lado a lado** + **médias por categoria** + **média geral** (média das 6 notas: 2 pessoas × 3 categorias).
+- Listagem com filtros: melhores avaliados, mais recentes, "queremos voltar", por tipo (restaurante / evento).
 - Visão de mapa opcional.
+
+### 7. Pra ver — filmes, séries, animes, podcasts
+- Lista compartilhada de mídia que vocês querem consumir / estão consumindo / já consumiram.
+- Adicionar item: título, tipo (`movie`, `series`, `anime`, `podcast`, `book`, `other`), capa opcional, status inicial (default `want`).
+- Status muda manualmente: `want` → `watching` → `done`.
+- Quando alguém marca como `done` (ou em qualquer momento), pode adicionar **review individual**:
+  - Nota 0–5
+  - Comentário livre
+  - Data em que terminou
+- Visão do item mostra os dois reviews lado a lado + média.
+- Listagem com filtros por status e por tipo. Aba "queremos ver" destacada.
+- Notificar o parceiro quando adicionar item novo na lista.
+- Integração com TMDB / AniList / etc. é **opcional** — V1 aceita entrada manual; `external_id` e `cover_url` ficam disponíveis pra usar depois.
 
 ### 8. Estatísticas do relacionamento
 Dashboard com cards:
 - Dias juntos
-- Total de mensagens (e quem mandou mais)
-- Mensagem mais longa
 - Total de memórias
 - Mês com mais memórias
 - Streak atual e maior streak histórica
 - Total de perguntas respondidas
 - Total de lugares visitados
-- Top 5 lugares
+- Top 5 lugares (por média geral)
 - Distância total entre lugares (se tiver coords) — "viajamos X km juntos"
 - Distribuição de respostas por categoria de pergunta
+- Total de mídias consumidas (e por tipo)
+- Top 5 mídias (por média dos dois)
 
 Tudo via queries SQL diretas. Cachear via TanStack Query com `staleTime` alto (15min).
 
@@ -334,12 +355,12 @@ Quando me ajudar neste projeto:
 
 1. ✅ Setup do Expo + Supabase + auth + perfis
 2. ✅ Contador de dias + tela inicial
-3. ✅ Chat realtime
-4. ✅ Memórias (galeria + upload)
-5. ✅ Countdowns
-6. ✅ Push notifications (infra base)
-7. ✅ Perguntas diárias + streak
-8. ✅ Lugares + reviews
+3. ✅ Memórias (galeria + upload)
+4. ✅ Countdowns
+5. ✅ Push notifications (infra base)
+6. ✅ Perguntas diárias + streak
+7. ✅ Lugares + reviews
+8. ✅ Pra ver (filmes, séries, animes, podcasts)
 9. ✅ Estatísticas
 
 Cada feature deve ser entregue **inteira** antes de partir pra próxima (incluindo UI, banco, queries e push se aplicável).
