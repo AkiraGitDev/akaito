@@ -19,6 +19,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/use-auth';
 import { useMyProfile, useUpdateProfile, useUploadAvatar } from '@/lib/queries/profiles';
 import { formatBRDate, maskBRDate, parseBRDate } from '@/lib/utils/dates';
+import { confirmDestructive } from '@/lib/utils/confirm';
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -90,16 +91,9 @@ export default function ProfileScreen() {
   }
 
   async function handleLogout() {
-    Alert.alert('Sair', 'Tem certeza?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sair',
-        style: 'destructive',
-        onPress: async () => {
-          await supabase.auth.signOut();
-        },
-      },
-    ]);
+    const ok = await confirmDestructive('Sair', 'Tem certeza?', 'Sair');
+    if (!ok) return;
+    await supabase.auth.signOut();
   }
 
   const avatarUrl = profile?.avatar_url ?? null;

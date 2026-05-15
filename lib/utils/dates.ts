@@ -42,3 +42,14 @@ export function maskBRDate(input: string): string {
   if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
+
+export function daysFromNow(isoDate: string, now: Date = new Date()): number {
+  return differenceInCalendarDays(parseISO(isoDate), now);
+}
+
+export function formatDaysRemaining(days: number): string {
+  if (days < 0) return 'Já passou';
+  if (days === 0) return 'Hoje!';
+  if (days === 1) return 'Amanhã';
+  return `Em ${days} dias`;
+}

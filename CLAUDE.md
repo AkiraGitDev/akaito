@@ -353,17 +353,49 @@ Quando me ajudar neste projeto:
 
 ## Roadmap (ordem sugerida)
 
-1. ✅ Setup do Expo + Supabase + auth + perfis
-2. ✅ Contador de dias + tela inicial
-3. ✅ Memórias (galeria + upload)
-4. ✅ Countdowns
-5. ✅ Push notifications (infra base)
-6. ✅ Perguntas diárias + streak
-7. ✅ Lugares + reviews
-8. ✅ Pra ver (filmes, séries, animes, podcasts)
-9. ✅ Estatísticas
+Status atualizado em **2026-05-15**.
+
+1. ✅ Setup do Expo + Supabase + auth + perfis (inclui upload de avatar)
+2. ✅ Contador de dias + tela inicial (com perfis lado a lado, idade calculada, barra de progresso até o próximo milestone)
+3. ⏳ Memórias (galeria + upload)
+4. ⏳ Countdowns
+5. ⏳ Push notifications (infra base)
+6. ⏳ Perguntas diárias + streak
+7. ⏳ Lugares + reviews
+8. ⏳ Pra ver (filmes, séries, animes, podcasts)
+9. ⏳ Estatísticas
 
 Cada feature deve ser entregue **inteira** antes de partir pra próxima (incluindo UI, banco, queries e push se aplicável).
+
+---
+
+## Status atual (snapshot)
+
+**Funcionando hoje no app:**
+- Login via OTP code de 6–10 dígitos por e-mail (Supabase Auth). Templates de e-mail (`Confirm signup` e `Magic Link`) editados pra mostrar `{{ .Token }}` em vez do link clicável.
+- Guard de sessão em `app/_layout.tsx` (`AuthGate`) redireciona entre `(auth)` e `(tabs)`.
+- Tabs: Início, Memórias, Pra ver, Lugares, Stats (placeholders pras 4 últimas).
+- Tela inicial: contador grande de dias, card "Próximo marco" com barra de progresso, dois `ProfileCard` (você e parceira).
+- Tela de perfil (`app/profile.tsx`): avatar grande com upload via `expo-image-picker` → bucket `avatars`, edição de nome e aniversário (com máscara DD/MM/AAAA), botão "Sair".
+
+**Banco de dados:**
+- Todas as 13 tabelas do schema criadas via SQL Editor (porta 5432 do pooler bloqueada na rede do dev, então `db push` da CLI não funciona — sempre aplicar migrations pelo SQL Editor do dashboard).
+- Bucket `avatars` (público) com políticas de leitura/escrita.
+- Trigger `on_auth_user_created` cria `profile` automático ao primeiro login.
+- RLS ligado em tudo, política "authenticated faz tudo".
+
+**Stack instalado (além do template Expo):**
+- Storage: `@react-native-async-storage/async-storage` (substituiu MMKV — funciona em Expo Go e web)
+- Web rodando em modo SPA (`web.output: "single"` em `app.json`) pra evitar SSR onde `window` não existe
+- `softwareKeyboardLayoutMode: "resize"` no Android pra teclado não cobrir inputs
+
+**Decisões tomadas que divergem do CLAUDE.md original:**
+- Chat realtime foi removido — namorada não quer usar. Substituído por aba "Pra ver" (mídia: filmes, séries, animes, podcasts) com lista compartilhada.
+- Auth: usa OTP code (6–10 dígitos), não magic link URL — evita deep linking complexo. Funcionalmente equivalente pra 2 usuários.
+- Storage local: AsyncStorage em vez de MMKV — performance é irrelevante pra 2 usuários, compatibilidade com Expo Go vale mais.
+- Namorada ainda não tem login. `EXPO_PUBLIC_USER_ID_HER` vazio. Login dela acontece quando APK preview estiver pronto.
+
+**Próximo passo aberto:** decidir entre Countdowns, Memórias, Pra ver, ou Push notifications.
 
 ---
 

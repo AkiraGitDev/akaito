@@ -4,7 +4,14 @@ import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 
 import { useMyProfile, usePartnerProfile, type Profile } from '@/lib/queries/profiles';
-import { calculateAge, daysTogether, nextMilestone } from '@/lib/utils/dates';
+import { useCountdowns } from '@/lib/queries/countdowns';
+import {
+  calculateAge,
+  daysFromNow,
+  daysTogether,
+  formatDaysRemaining,
+  nextMilestone,
+} from '@/lib/utils/dates';
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -64,6 +71,8 @@ export default function Home() {
 
   const { data: me } = useMyProfile();
   const { data: partner } = usePartnerProfile();
+  const { data: events } = useCountdowns();
+  const upcoming = events?.slice(0, 3) ?? [];
 
   return (
     <SafeAreaView className="flex-1 bg-love-50">
@@ -87,6 +96,39 @@ export default function Home() {
             />
           </View>
         </View>
+
+        <Pressable
+          onPress={() => router.push('/countdowns')}
+          className="mb-8 rounded-3xl bg-white p-5 active:bg-love-100">
+          <Text className="mb-3 text-sm text-gray-500">Próximos eventos</Text>
+          {upcoming.length === 0 ? (
+            <Text className="text-base text-gray-400">Sem eventos. Toque pra adicionar.</Text>
+          ) : (
+            upcoming.map((event, index) => {
+              const days = daysFromNow(event.target_date);
+              return (
+                <View
+                  key={event.id}
+                  className={`flex-row items-center py-2 ${
+                    index < upcoming.length - 1 ? 'border-b border-love-100' : ''
+                  }`}>
+                  <Text className="mr-4 text-2xl">{event.emoji || '📅'}</Text>
+                  <View className="flex-1">
+                    <Text
+                      className="text-base font-semibold text-gray-800"
+                      numberOfLines={1}>
+                      {event.title}
+                    </Text>
+                    <Text className="text-xs text-gray-500">
+                      {formatDaysRemaining(days)}
+                    </Text>
+                  </View>
+                  <Text className="text-love-600 text-xl font-bold">{days}</Text>
+                </View>
+              );
+            })
+          )}
+        </Pressable>
 
         <View className="flex-row gap-3">
           <ProfileCard
