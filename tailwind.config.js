@@ -19,7 +19,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        display: ['System'],
+        sans: ['Inter_400Regular'],
+        serif: ['DMSerifDisplay_400Regular'],
       },
     },
   },

@@ -101,14 +101,6 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-love-50">
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'Perfil',
-          headerStyle: { backgroundColor: '#fff1f3' },
-          headerTintColor: '#c40b43',
-        }}
-      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1">
@@ -121,7 +113,15 @@ export default function ProfileScreen() {
             <>
               <View className="mb-8 items-center">
                 <Pressable onPress={handlePickAvatar} disabled={uploadAvatar.isPending}>
-                  <View className="h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-love-300 bg-love-200">
+                  <View
+                    style={{
+                      shadowColor: '#c40b43',
+                      shadowOpacity: 0.15,
+                      shadowRadius: 16,
+                      shadowOffset: { width: 0, height: 6 },
+                      elevation: 6,
+                    }}
+                    className="h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-love-300 bg-love-200">
                     {avatarUrl ? (
                       <Image
                         source={{ uri: avatarUrl }}
@@ -129,7 +129,11 @@ export default function ProfileScreen() {
                         contentFit="cover"
                       />
                     ) : (
-                      <Text className="text-love-700 text-4xl font-bold">{initials}</Text>
+                      <Text
+                        className="text-love-700 text-5xl"
+                        style={{ fontFamily: 'DMSerifDisplay_400Regular' }}>
+                        {initials}
+                      </Text>
                     )}
                     {uploadAvatar.isPending && (
                       <View className="absolute inset-0 items-center justify-center bg-black/40">
@@ -138,27 +142,49 @@ export default function ProfileScreen() {
                     )}
                   </View>
                 </Pressable>
-                <Text className="text-love-600 mt-2 text-sm">Trocar foto</Text>
+                <Text
+                  className="text-love-600 mt-3 text-sm"
+                  style={{ fontFamily: 'Inter_500Medium' }}>
+                  Trocar foto
+                </Text>
               </View>
 
-              <Text className="mb-1 text-sm text-gray-500">E-mail</Text>
-              <Text className="mb-6 text-base text-gray-800">{session?.user.email}</Text>
+              <Text
+                className="mb-1 text-sm text-gray-500"
+                style={{ fontFamily: 'Inter_500Medium' }}>
+                E-mail
+              </Text>
+              <Text
+                className="mb-6 text-base text-gray-800"
+                style={{ fontFamily: 'Inter_400Regular' }}>
+                {session?.user.email}
+              </Text>
 
-              <Text className="mb-1 text-sm text-gray-500">Nome</Text>
+              <Text
+                className="mb-1 text-sm text-gray-500"
+                style={{ fontFamily: 'Inter_500Medium' }}>
+                Nome
+              </Text>
               <TextInput
                 value={name}
                 onChangeText={setName}
                 placeholder="Seu nome"
+                style={{ fontFamily: 'Inter_400Regular' }}
                 className="mb-5 rounded-2xl border border-love-200 bg-white px-5 py-4 text-base"
               />
 
-              <Text className="mb-1 text-sm text-gray-500">Aniversário</Text>
+              <Text
+                className="mb-1 text-sm text-gray-500"
+                style={{ fontFamily: 'Inter_500Medium' }}>
+                Aniversário
+              </Text>
               <TextInput
                 value={birthday}
                 onChangeText={(v) => setBirthday(maskBRDate(v))}
                 placeholder="DD/MM/AAAA"
                 keyboardType="number-pad"
                 maxLength={10}
+                style={{ fontFamily: 'Inter_400Regular' }}
                 className="mb-8 rounded-2xl border border-love-200 bg-white px-5 py-4 text-base"
               />
 
@@ -169,14 +195,22 @@ export default function ProfileScreen() {
                 {updateProfile.isPending ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text className="text-center text-base font-semibold text-white">Salvar</Text>
+                  <Text
+                    className="text-center text-base text-white"
+                    style={{ fontFamily: 'Inter_600SemiBold' }}>
+                    Salvar
+                  </Text>
                 )}
               </Pressable>
 
               <Pressable
                 onPress={handleLogout}
                 className="mt-8 rounded-2xl border border-red-200 bg-white py-4 active:bg-red-50">
-                <Text className="text-center text-base font-semibold text-red-600">Sair</Text>
+                <Text
+                  className="text-center text-base text-red-600"
+                  style={{ fontFamily: 'Inter_600SemiBold' }}>
+                  Sair
+                </Text>
               </Pressable>
             </>
           )}

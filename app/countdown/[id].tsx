@@ -93,14 +93,7 @@ export default function CountdownForm() {
 
   return (
     <SafeAreaView className="flex-1 bg-love-50">
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: isNew ? 'Novo evento' : 'Editar evento',
-          headerStyle: { backgroundColor: '#fff1f3' },
-          headerTintColor: '#c40b43',
-        }}
-      />
+      <Stack.Screen options={{ title: isNew ? 'Novo evento' : 'Editar evento' }} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1">
@@ -111,7 +104,11 @@ export default function CountdownForm() {
             <ActivityIndicator color="#c40b43" />
           ) : (
             <>
-              <Text className="mb-1 text-sm text-gray-500">Emoji</Text>
+              <Text
+                className="mb-1 text-sm text-gray-500"
+                style={{ fontFamily: 'Inter_500Medium' }}>
+                Emoji
+              </Text>
               <View className="mb-5 flex-row flex-wrap gap-2 rounded-2xl border border-love-200 bg-white p-3">
                 {EMOJI_OPTIONS.map((e) => {
                   const selected = emoji === e;
@@ -128,21 +125,31 @@ export default function CountdownForm() {
                 })}
               </View>
 
-              <Text className="mb-1 text-sm text-gray-500">Título</Text>
+              <Text
+                className="mb-1 text-sm text-gray-500"
+                style={{ fontFamily: 'Inter_500Medium' }}>
+                Título
+              </Text>
               <TextInput
                 value={title}
                 onChangeText={setTitle}
                 placeholder="Aniversário dela, viagem, ..."
+                style={{ fontFamily: 'Inter_400Regular' }}
                 className="mb-5 rounded-2xl border border-love-200 bg-white px-5 py-4 text-base"
               />
 
-              <Text className="mb-1 text-sm text-gray-500">Data</Text>
+              <Text
+                className="mb-1 text-sm text-gray-500"
+                style={{ fontFamily: 'Inter_500Medium' }}>
+                Data
+              </Text>
               <TextInput
                 value={date}
                 onChangeText={(v) => setDate(maskBRDate(v))}
                 placeholder="DD/MM/AAAA"
                 keyboardType="number-pad"
                 maxLength={10}
+                style={{ fontFamily: 'Inter_400Regular' }}
                 className="mb-8 rounded-2xl border border-love-200 bg-white px-5 py-4 text-base"
               />
 
@@ -153,7 +160,11 @@ export default function CountdownForm() {
                 {pending ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text className="text-center text-base font-semibold text-white">Salvar</Text>
+                  <Text
+                    className="text-center text-base text-white"
+                    style={{ fontFamily: 'Inter_600SemiBold' }}>
+                    Salvar
+                  </Text>
                 )}
               </Pressable>
 
@@ -162,7 +173,11 @@ export default function CountdownForm() {
                   onPress={handleDelete}
                   disabled={pending}
                   className="mt-8 rounded-2xl border border-red-200 bg-white py-4 active:bg-red-50">
-                  <Text className="text-center text-base font-semibold text-red-600">Apagar</Text>
+                  <Text
+                    className="text-center text-base text-red-600"
+                    style={{ fontFamily: 'Inter_600SemiBold' }}>
+                    Apagar
+                  </Text>
                 </Pressable>
               )}
 

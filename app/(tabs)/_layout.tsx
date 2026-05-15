@@ -5,9 +5,19 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#e91550',
+        tabBarActiveTintColor: '#c40b43',
         tabBarInactiveTintColor: '#9ca3af',
         headerShown: false,
+        animation: 'shift',
+        tabBarLabelStyle: {
+          fontFamily: 'Inter_500Medium',
+          fontSize: 11,
+        },
+        tabBarStyle: {
+          backgroundColor: '#ffffff',
+          borderTopColor: '#ffe1e7',
+          paddingTop: 4,
+        },
       }}>
       <Tabs.Screen
         name="index"

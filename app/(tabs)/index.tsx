@@ -2,6 +2,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { useMyProfile, usePartnerProfile, type Profile } from '@/lib/queries/profiles';
 import { useCountdowns } from '@/lib/queries/countdowns';
@@ -20,6 +21,14 @@ function initialsOf(name: string): string {
   return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
 }
 
+const CARD_SHADOW = {
+  shadowColor: '#c40b43',
+  shadowOpacity: 0.08,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 3,
+};
+
 type CardProps = {
   profile: Profile | null;
   placeholder: string;
@@ -34,6 +43,7 @@ function ProfileCard({ profile, placeholder, onPress }: CardProps) {
     <Pressable
       onPress={onPress}
       disabled={!onPress}
+      style={CARD_SHADOW}
       className="flex-1 items-center rounded-3xl bg-white p-5 active:bg-love-100">
       <View className="mb-3 h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-love-200">
         {profile?.avatar_url ? (
@@ -43,20 +53,35 @@ function ProfileCard({ profile, placeholder, onPress }: CardProps) {
             contentFit="cover"
           />
         ) : (
-          <Text className="text-love-700 text-2xl font-bold">
+          <Text className="text-love-700 font-serif text-3xl">
             {profile ? initialsOf(name) : '💞'}
           </Text>
         )}
       </View>
-      <Text className="text-base font-semibold text-gray-800" numberOfLines={1}>
+      <Text
+        className="font-sans text-base font-semibold text-gray-800"
+        numberOfLines={1}
+        style={{ fontFamily: 'Inter_600SemiBold' }}>
         {name}
       </Text>
       {age !== null ? (
-        <Text className="text-sm text-gray-500">{age} anos</Text>
+        <Text
+          className="text-sm text-gray-500"
+          style={{ fontFamily: 'Inter_400Regular' }}>
+          {age} anos
+        </Text>
       ) : profile ? (
-        <Text className="text-sm text-gray-400">Sem aniversário</Text>
+        <Text
+          className="text-sm text-gray-400"
+          style={{ fontFamily: 'Inter_400Regular' }}>
+          Sem aniversário
+        </Text>
       ) : (
-        <Text className="text-sm text-gray-400">Esperando...</Text>
+        <Text
+          className="text-sm text-gray-400"
+          style={{ fontFamily: 'Inter_400Regular' }}>
+          Esperando...
+        </Text>
       )}
     </Pressable>
   );
@@ -77,67 +102,111 @@ export default function Home() {
   return (
     <SafeAreaView className="flex-1 bg-love-50">
       <ScrollView contentContainerClassName="px-6 pt-4 pb-8">
-        <View className="mb-10 items-center">
-          <Text className="text-love-700 text-base font-medium">Juntos há</Text>
-          <Text className="text-love-600 text-8xl font-bold tracking-tight">{days}</Text>
-          <Text className="text-love-700 text-2xl">Dias 💖</Text>
-        </View>
+        <Animated.View
+          entering={FadeInDown.duration(700).springify()}
+          className="mb-10 items-center">
+          <Text
+            className="text-love-700 text-base"
+            style={{ fontFamily: 'Inter_500Medium' }}>
+            Juntos há
+          </Text>
+          <Text
+            className="text-love-600 text-8xl leading-tight"
+            style={{ fontFamily: 'DMSerifDisplay_400Regular' }}>
+            {days}
+          </Text>
+          <Text
+            className="text-love-700 text-2xl"
+            style={{ fontFamily: 'DMSerifDisplay_400Regular' }}>
+            Dias 💖
+          </Text>
+        </Animated.View>
 
-        <View className="mb-8 rounded-3xl bg-white p-5">
-          <Text className="mb-2 text-sm text-gray-500">Próximo marco</Text>
-          <View className="mb-2 flex-row items-baseline justify-between">
-            <Text className="text-love-700 text-2xl font-bold">{next} dias</Text>
-            <Text className="text-sm text-gray-500">Faltam {remaining}</Text>
+        <Animated.View
+          entering={FadeIn.duration(700).delay(150)}
+          style={CARD_SHADOW}
+          className="mb-6 rounded-3xl bg-white p-5">
+          <Text
+            className="mb-2 text-sm text-gray-500"
+            style={{ fontFamily: 'Inter_500Medium' }}>
+            Próximo marco
+          </Text>
+          <View className="mb-3 flex-row items-baseline justify-between">
+            <Text
+              className="text-love-700 text-3xl"
+              style={{ fontFamily: 'DMSerifDisplay_400Regular' }}>
+              {next} dias
+            </Text>
+            <Text
+              className="text-sm text-gray-500"
+              style={{ fontFamily: 'Inter_400Regular' }}>
+              Faltam {remaining}
+            </Text>
           </View>
           <View className="h-2 overflow-hidden rounded-full bg-love-100">
-            <View
-              className="h-full bg-love-500"
-              style={{ width: `${progress}%` }}
-            />
+            <View className="h-full bg-love-500" style={{ width: `${progress}%` }} />
           </View>
-        </View>
+        </Animated.View>
 
-        <Pressable
-          onPress={() => router.push('/countdowns')}
-          className="mb-8 rounded-3xl bg-white p-5 active:bg-love-100">
-          <Text className="mb-3 text-sm text-gray-500">Próximos eventos</Text>
-          {upcoming.length === 0 ? (
-            <Text className="text-base text-gray-400">Sem eventos. Toque pra adicionar.</Text>
-          ) : (
-            upcoming.map((event, index) => {
-              const days = daysFromNow(event.target_date);
-              return (
-                <View
-                  key={event.id}
-                  className={`flex-row items-center py-2 ${
-                    index < upcoming.length - 1 ? 'border-b border-love-100' : ''
-                  }`}>
-                  <Text className="mr-4 text-2xl">{event.emoji || '📅'}</Text>
-                  <View className="flex-1">
+        <Animated.View entering={FadeIn.duration(700).delay(300)}>
+          <Pressable
+            onPress={() => router.push('/countdowns')}
+            style={CARD_SHADOW}
+            className="mb-8 rounded-3xl bg-white p-5 active:bg-love-100">
+            <Text
+              className="mb-3 text-sm text-gray-500"
+              style={{ fontFamily: 'Inter_500Medium' }}>
+              Próximos eventos
+            </Text>
+            {upcoming.length === 0 ? (
+              <Text
+                className="text-base text-gray-400"
+                style={{ fontFamily: 'Inter_400Regular' }}>
+                Sem eventos. Toque pra adicionar.
+              </Text>
+            ) : (
+              upcoming.map((event, index) => {
+                const days = daysFromNow(event.target_date);
+                return (
+                  <View
+                    key={event.id}
+                    className={`flex-row items-center py-2 ${
+                      index < upcoming.length - 1 ? 'border-b border-love-100' : ''
+                    }`}>
+                    <Text className="mr-4 text-2xl">{event.emoji || '📅'}</Text>
+                    <View className="flex-1">
+                      <Text
+                        className="text-base text-gray-800"
+                        numberOfLines={1}
+                        style={{ fontFamily: 'Inter_600SemiBold' }}>
+                        {event.title}
+                      </Text>
+                      <Text
+                        className="text-xs text-gray-500"
+                        style={{ fontFamily: 'Inter_400Regular' }}>
+                        {formatDaysRemaining(days)}
+                      </Text>
+                    </View>
                     <Text
-                      className="text-base font-semibold text-gray-800"
-                      numberOfLines={1}>
-                      {event.title}
-                    </Text>
-                    <Text className="text-xs text-gray-500">
-                      {formatDaysRemaining(days)}
+                      className="text-love-600 text-2xl"
+                      style={{ fontFamily: 'DMSerifDisplay_400Regular' }}>
+                      {days}
                     </Text>
                   </View>
-                  <Text className="text-love-600 text-xl font-bold">{days}</Text>
-                </View>
-              );
-            })
-          )}
-        </Pressable>
+                );
+              })
+            )}
+          </Pressable>
+        </Animated.View>
 
-        <View className="flex-row gap-3">
+        <Animated.View entering={FadeIn.duration(700).delay(450)} className="flex-row gap-3">
           <ProfileCard
             profile={me ?? null}
             placeholder="Você"
             onPress={() => router.push('/profile')}
           />
           <ProfileCard profile={partner ?? null} placeholder="Ela" />
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
