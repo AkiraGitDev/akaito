@@ -232,7 +232,6 @@ media_reviews (
 - Visualizações:
   - **Timeline** (lista cronológica reversa)
   - **Calendário** (heatmap dos dias com memórias)
-  - **Mapa** (pins onde memórias têm coordenadas)
 - Cada memória tem: caption, local opcional, data, fotos.
 
 ### 3. Push Notifications
@@ -357,7 +356,7 @@ Status atualizado em **2026-05-15**.
 
 1. ✅ Setup do Expo + Supabase + auth + perfis (inclui upload de avatar)
 2. ✅ Contador de dias + tela inicial (perfis lado a lado, idade calculada, milestone com barra de progresso, lista dos próximos 3 eventos)
-3. ⏳ Memórias (galeria + upload)
+3. ✅ Memórias (timeline cronológica + calendário heatmap mensal com nav e seleção de dia; multi-photo upload via picker; CRUD completo de memória e fotos individuais)
 4. ✅ Countdowns (CRUD completo: lista ordenada por proximidade, criar/editar/apagar, emoji picker com 30 opções curadas, máscara DD/MM/AAAA, destaque dos 3 próximos na home)
 5. ⏳ Push notifications (infra base)
 6. ⏳ Perguntas diárias + streak
@@ -380,11 +379,12 @@ Cada feature deve ser entregue **inteira** antes de partir pra próxima (incluin
 - Tela inicial: contador grande de dias com fonte serifada, card "Próximo marco" com barra de progresso, card "Próximos eventos" listando os 3 countdowns mais próximos, dois `ProfileCard` (você e parceira). Entradas animadas com Reanimated.
 - Tela de perfil (`app/profile.tsx`): avatar grande com upload via `expo-image-picker` → bucket `avatars`, edição de nome e aniversário (com máscara DD/MM/AAAA), botão "Sair".
 - Countdowns: lista (`app/countdowns.tsx`) ordenada por proximidade com `daysFromNow`; tela de criar/editar (`app/countdown/[id].tsx`) com título, data com máscara DD/MM/AAAA, **emoji picker** (grid de 30 emojis curados); helper compartilhado `lib/utils/confirm.ts` pra confirmar exclusão (usa `window.confirm` no web, `Alert.alert` no mobile).
+- Memórias: tab (`app/(tabs)/memories.tsx`) com toggle animado **Timeline ↔ Calendário** (indicador rosa deslizando com `withTiming` cubic out). Timeline = cards com foto cover 4:3, badge "+N" de fotos extras, data em DM Serif, local com pin, caption truncada. Calendário (`components/features/memory-calendar.tsx`) = grid mensal puro (sem lib), navegação ‹ › com `FadeIn` no mês, células com scale spring no press, dias com memória destacados em rosa, dia selecionado em rosa forte. Tela de criar/editar (`app/memory/[id].tsx`) com multi-photo picker (até 10 por vez), grid de thumbnails com X individual, data/local/legenda. Storage no bucket `memories` (público, mesmo padrão do `avatars`). Hooks em `lib/queries/memories.ts`.
 - Headers das telas empilhadas (Perfil, Countdowns, Countdown form) **pré-declarados** no Stack do root layout pra resolver bug do safe-area top que aparecia na primeira montagem com `edgeToEdgeEnabled: true`.
 
 **Banco de dados:**
 - Todas as 13 tabelas do schema criadas via SQL Editor (porta 5432 do pooler bloqueada na rede do dev, então `db push` da CLI não funciona — sempre aplicar migrations pelo SQL Editor do dashboard).
-- Bucket `avatars` (público) com políticas de leitura/escrita.
+- Buckets `avatars` e `memories` (públicos) com políticas de leitura/escrita.
 - Trigger `on_auth_user_created` cria `profile` automático ao primeiro login.
 - RLS ligado em tudo, política "authenticated faz tudo".
 
@@ -403,7 +403,7 @@ Cada feature deve ser entregue **inteira** antes de partir pra próxima (incluin
 - Namorada ainda não tem login. `EXPO_PUBLIC_USER_ID_HER` vazio. Login dela acontece quando APK preview estiver pronto.
 - Migrations aplicadas via SQL Editor do dashboard (CLI `db push` falha pela porta 5432 bloqueada na rede do dev).
 
-**Próximo passo aberto:** decidir entre Memórias, Pra ver, ou Push notifications.
+**Próximo passo aberto:** decidir entre Pra ver, Push notifications, ou começar Perguntas Diárias / Lugares (que dependem da parceira logar pra ficarem completas).
 
 ---
 

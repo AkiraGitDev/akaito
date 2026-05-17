@@ -58,6 +58,7 @@ function AuthGate() {
       <Stack.Screen name="profile" options={{ ...headerOptions, title: 'Perfil' }} />
       <Stack.Screen name="countdowns" options={{ ...headerOptions, title: 'Countdowns' }} />
       <Stack.Screen name="countdown/[id]" options={{ ...headerOptions, title: 'Evento' }} />
+      <Stack.Screen name="memory/[id]" options={{ ...headerOptions, title: 'Memória' }} />
     </Stack>
   );
 }
