@@ -12,5 +12,6 @@ export const env = {
   SUPABASE_ANON_KEY,
   USER_ID_ME: process.env.EXPO_PUBLIC_USER_ID_ME ?? '',
   USER_ID_HER: process.env.EXPO_PUBLIC_USER_ID_HER ?? '',
+  TMDB_TOKEN: process.env.EXPO_PUBLIC_TMDB_TOKEN ?? '',
   COUPLE_STARTED_AT: '2025-01-17',
 };
